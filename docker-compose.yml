@@ -1,0 +1,45 @@
+# anchor
+# x-env: &shared-env
+#   env_file:
+#     - ./.env
+
+networks:
+  data_network:
+    external: false
+
+services:
+  kafka:
+    image: apache/kafka:${KAFKA_VERSION}
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - ${KAFKA_EXTERNAL_PORT}:9092
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - ./config/server.properties:/etc/kafka.properties:ro  # read-only
+      - ./scripts/init_and_run.sh:/init_and_run.sh:ro
+    networks:
+      - data_network
+
+    # <<: *shared-env
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
+    container_name: clickhouse
+    hostname: clickhouse
+    ports:
+      - ${CLICKHOUSE_HTTP_PORT}:8123
+      - ${CLICKHOUSE_TCP_PORT}:9000
+    environment:
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_DEFAULT_PASSWORD}
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    networks:
+      - data_network
+
+volumes:
+  kafka_data:
+  clickhouse_data:
+
+
+
