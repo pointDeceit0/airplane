@@ -34,6 +34,8 @@ x-airflow-common:
     &airflow-common-depends-on
     postgres:
       condition: service_healthy
+  networks:
+    - data_network
 
 networks:
   data_network:
@@ -51,12 +53,45 @@ services:
       - ${KAFKA_EXTERNAL_PORT}:9092
     volumes:
       - kafka_data:/var/lib/kafka/data
-      - ./config/server.properties:/etc/kafka.properties:ro  # read-only
-      - ./scripts/init_and_run.sh:/init_and_run.sh:ro
+      # - ./config/server.properties:/etc/kafka.properties:ro  # read-only
+      # - ./scripts/init_and_run.sh:/init_and_run.sh:ro
+    environment:
+      # === LISTENERS === #
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:${KAFKA_INTERNAL_PORT},EXTERNAL://0.0.0.0:${KAFKA_EXTERNAL_PORT},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT}
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:${KAFKA_INTERNAL_PORT},EXTERNAL://${KAFKA_EXTERNAL_IP}:${KAFKA_EXTERNAL_PORT}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # === KRAFT SETTINGS === #
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:${KAFKA_CONTROLLER_PORT}'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+
+      # === SETTINGS INTRINSIC TO SINGLE NODE SERVER === #
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+
     networks:
       - data_network
     profiles: ["storage"]
     # <<: *shared-env
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:${KAFKA_UI_TAG}
+    container_name: kafka-ui
+    ports:
+      - ${KAFKA_UI_PORT}:8080 # Интерфейс будет доступен на порту 8081
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:${KAFKA_EXTERNAL_PORT}
+    networks:
+      - data_network
+    profiles: ["storage"]
 
   clickhouse:
     image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
@@ -91,6 +126,8 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+    networks:
+      - data_network
     profiles: ["etl"]
 
   airflow-apiserver:
