@@ -83,9 +83,8 @@ def get_flights_from_iterval_send_dict_to_kafka(unix_begin: int, unix_end: int, 
 if __name__ == "__main__":
     # TODO: Add logging
     parser = argparse.ArgumentParser()
-    parser.add_argument('--date', required=True, help='Logical date from Airflow')
     parser.add_argument('--begin', default='')
-    parser.add_argument('--end', default='1h')
+    parser.add_argument('--end', default='')
     args = parser.parse_args()
 
     load_dotenv()
