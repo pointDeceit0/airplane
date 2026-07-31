@@ -42,8 +42,7 @@ def get_flights_from_iterval_send_dict_to_kafka(unix_begin: int, unix_end: int, 
         return None
 
     conf = {
-        'bootstrap.servers': f'{network}:9092',  # Имя контейнера в docker-сети
-        # 'bootstrap.servers': '192.168.1.99:9092',  # Имя контейнера в docker-сети
+        'bootstrap.servers': f'{network}:9092',  # container name in docker network
         'linger.ms': 50,
         'batch.size': 32768,
         'compression.type': 'lz4'
