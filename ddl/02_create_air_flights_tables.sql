@@ -51,3 +51,19 @@ SELECT lower(icao24) AS icao24,
 	   COALESCE(arrival_airport_candidates_count, -1) AS arrival_airport_candidates_count
 FROM raw.air_flights
 WHERE first_seen IS NOT NULL AND last_seen IS NOT NULL;
+
+CREATE TABLE ref.dict_air_airports (
+    iata FixedString(3),
+    icao FixedString(4),
+    name String,
+    country LowCardinality(FixedString(2)), -- matches int to String
+    city String,
+    sub_division String,
+    elevation Float32,
+    latitude Float32,
+    longitude Float32,
+    tz LowCardinality(String),
+    lid String
+)
+ENGINE = MergeTree()
+ORDER BY iata;
