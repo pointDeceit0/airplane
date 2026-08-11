@@ -8,3 +8,4 @@ opentelemetry-exporter-otlp-proto-http==1.43.0
 opentelemetry-proto==1.43.0
 opentelemetry-sdk==1.43.0
 opentelemetry-semantic-conventions==0.64b0
+apache-airflow-providers-apache-kafka==1.0.0
