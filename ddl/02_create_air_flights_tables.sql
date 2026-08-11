@@ -17,7 +17,8 @@ SETTINGS
 	kafka_topic_list = 'raw_opensky_telemetry',
 	kafka_group_name = 'clickhouse',
 	kafka_format = 'JSONEachRow',
-	kafka_skip_broken_messages = 100;
+	kafka_skip_broken_messages = 100,
+	kafka_max_block_size = 500;
 
 CREATE TABLE dds.air_flights (
     icao24 String,

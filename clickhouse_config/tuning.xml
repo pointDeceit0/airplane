@@ -1,0 +1,13 @@
+<clickhouse>
+    <!-- Mark Cache restriction. 128 MB -->
+    <mark_cache_size>134217728</mark_cache_size>
+    
+    <!-- Full clear uncompressed data cache -->
+    <uncompressed_cache_size>0</uncompressed_cache_size>
+
+    <!-- Background flow of data merging (was 16) -->
+    <background_pool_size>2</background_pool_size>
+    
+    <!-- Number of pools of tasks by assignment -->
+    <background_schedule_pool_size>2</background_schedule_pool_size>
+</clickhouse>

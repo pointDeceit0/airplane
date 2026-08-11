@@ -2,6 +2,8 @@
     <profiles>
         <default>
             <max_memory_usage>536870912</max_memory_usage>
+            <max_insert_block_size>10000</max_insert_block_size>
+            <max_block_size>10000</max_block_size>
         </default>
     </profiles>
 </clickhouse>

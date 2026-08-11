@@ -25,6 +25,8 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     AIRFLOW__SCHEDULER__STANDALONE_DAG_PROCESSOR: 'false'
+    AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG: 1
+    AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: 1
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
@@ -94,17 +96,20 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 1.5G
     ports:
       - ${CLICKHOUSE_HTTP_PORT}:8123
       - ${CLICKHOUSE_TCP_PORT}:9000
     environment:
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_DEFAULT_PASSWORD}
+      # Tells jemaloc to return memory to docker
+      - MALLOC_CONF=background_thread:true,dirty_decay_ms:1000,muzzy_decay_ms:1000
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       # with the settings in reploy -> resources -> limits -> memory restricts clickhouse in memory
       - ./clickhouse_config/config_memory.xml:/etc/clickhouse-server/config.d/memory.xml
       - ./clickhouse_config/user_memory.xml:/etc/clickhouse-server/users.d/memory.xml
+      - ./clickhouse_config/tuning.xml:/etc/clickhouse-server/users.d/tuning.xml
     networks:
       - data_network
 
