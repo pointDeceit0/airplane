@@ -103,9 +103,6 @@ def flights():
 
         conn = BaseHook.get_connection('kafka_conn')
 
-        # TODO: Remove it
-        print(conn.host)
-
         producer = AirKafkaProducer(topic=TARGET_TOPIC, network=conn.host)
 
         for i, rec in enumerate(d):
