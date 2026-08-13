@@ -2,7 +2,7 @@
 import requests
 from typing import Tuple
 from datetime import datetime, timedelta
-from airflow.hooks.base import BaseHook
+from airflow.sdk.bases.hook import BaseHook
 
 
 # How many seconds before expiry to proactively refresh the token.
