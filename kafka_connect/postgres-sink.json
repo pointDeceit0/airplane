@@ -1,0 +1,19 @@
+{
+  "name": "postgres-jsonb-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "raw_opensky_telemetry",
+    "connection.url": "jdbc:postgresql://postgres:PORT/SCHEMA",
+    "connection.user": "USER",
+    "connection.password": "PASSWORD",
+    "insert.mode": "insert",
+    "auto.create": "false",
+    "table.name.format": "raw_data.air_interval_flights",
+    "pk.mode": "none",
+    "value.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "transforms": "hoist",
+    "transforms.hoist.type": "org.apache.kafka.connect.transforms.HoistField$Value",
+    "transforms.hoist.field": "raw_data"
+  }
+}

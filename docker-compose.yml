@@ -79,15 +79,68 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:${KAFKA_UI_TAG}
+    depends_on:
+      - kafka
     container_name: kafka-ui
     ports:
-      - ${KAFKA_UI_PORT}:8080 # Интерфейс будет доступен на порту 8081
+      - ${KAFKA_UI_PORT}:8080
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:${KAFKA_EXTERNAL_PORT}
     networks:
       - data_network
-    # profiles: ["storage"]
+  
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: postgres
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - data_network
+    profiles: ["oltp"]
+
+  
+  kafka-connect:
+    build: ./docker/kafka-connect
+    image: opensky-kafka-connect:latest
+    container_name: kafka-connect
+    depends_on:
+      - kafka
+      - postgres
+    ports:
+      - ${KAFKA_CONNECT_PORT}:8083
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:${KAFKA_INTERNAL_PORT}
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: ${KAFKA_CONNECT_PORT}
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      # Replication factor
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      # Disable schema, i.e. json arrives without schema
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      KAFKA_HEAP_OPTS: "-Xms256M -Xmx512M"
+    command:  # JDBC driver downloading
+      - bash 
+      - -c 
+      - /etc/confluent/docker/run
+    networks:
+      - data_network
+    profiles: ["oltp"]
 
   clickhouse:
     image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
@@ -112,10 +165,12 @@ services:
       - ./clickhouse_config/tuning.xml:/etc/clickhouse-server/users.d/tuning.xml
     networks:
       - data_network
+    profiles: ["olap"]
 
   airflow-standalone:
     <<: *airflow-common
     command: standalone
+    container_name: airflow
     ports:
       - "8080:8080"
     restart: always
@@ -230,3 +285,4 @@ services:
 volumes:
   kafka_data:
   clickhouse_data:
+  postgres_data:

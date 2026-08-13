@@ -1,0 +1,4 @@
+CREATE SCHEMA raw_data;
+CREATE SCHEMA dds_data;
+CREATE SCHEMA marts;
+CREATE SCHEMA ref_data;

@@ -39,8 +39,8 @@ def create_dag(dag_id: str, schedule: str):
         @task()
         def get_write_flights_from_api(**context) -> str:
             # Get interval
-            start_interval = context['data_interval_start']
-            end_interval = context['data_interval_end']
+            start_interval = context['data_interval_start'] - timedelta(days=DAY_LAG)
+            end_interval = context['data_interval_end'] - timedelta(days=DAY_LAG)
             print(f'Interval start:\t{start_interval.strftime("%Y-%m-%d %H:%M:%S")}')
             print(f'Interval end:\t{end_interval.strftime("%Y-%m-%d %H:%M:%S")}')
 
@@ -117,5 +117,5 @@ def create_dag(dag_id: str, schedule: str):
     return flights()
 
 
-dag_15m = create_dag('get_flight_from_interval_15m_dag', '*/15 * * * *')
-dag_backfill = create_dag('get_flight_from_interval_2h_dag', '*/59 */1 * * *')
+dag_15m = create_dag('AIR_get_flight_from_interval_15m_dag', '*/15 * * * *')
+dag_2h = create_dag('AIR_get_flight_from_interval_1h_dag', '*/60 * * * *')
