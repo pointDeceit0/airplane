@@ -10,8 +10,8 @@ from utils.token_manager import TokenManager
 from utils.kafka_send import AirKafkaProducer
 
 
-AIRFLOW_RAW_DATA_PATH = r'/opt/airflow/raw_data'
-TARGET_TOPIC = 'raw_opensky_telemetry'
+AIRFLOW_RAW_DATA_PATH = r'/opt/airflow/raw_data/air/air_interval_flights'
+TARGET_TOPIC = 'air_interval_flights'
 DAY_LAG = 2
 
 
