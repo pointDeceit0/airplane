@@ -3,3 +3,4 @@ CREATE SCHEMA dds_data;
 CREATE SCHEMA marts;
 CREATE SCHEMA ref_data;
 CREATE SCHEMA tech_data;
+CREATE SCHEMA log;
